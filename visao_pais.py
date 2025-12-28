@@ -64,67 +64,31 @@ df1 = df1.drop(index=5566)
 # Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
 df1 = df1.reset_index(drop=True)
 
-#===========Inicio do projeto=============
-#restaurantes cadastrados
-restaurantes = df1.loc[:,'Restaurant ID'].nunique()
-print(restaurantes)
+#=============Inicio do projeto=============
+#QUANTIDADE DE RESTAURANTES CADASTRADOS POR PAIS
+pais_rest = df1.loc[:,['Country name', 'Restaurant ID']].groupby('Country name')['Restaurant ID'].nunique().sort_values(ascending=False)
+pais_rest = pais_rest.reset_index().head(7)
 
-#paises cadastrados
-paises = df1.loc[:,'Country Code'].nunique()
-print(paises)
+# Encontrar a linha com o maior número de restaurantes
+linha_mais_restaurantes = pais_rest.loc[pais_rest['Restaurant ID'].idxmax()]
+#grafico
+px.bar (pais_rest, x='Country name', y='Restaurant ID', labels={'Country name':'Países', 'Restaurant ID': 'Quantidade de Resutaurantes'})
 
-#cidades cadastrados
-cidades = df1.loc[:,'City'].nunique()
-print(cidades)
+#---------------------------------------
+#QUANTIDADE DE CIDADE REGISTRADAS POR PAIS
+cc = df1.loc[:,['Country name','City']].groupby('Country name')['City'].nunique().sort_values(ascending=False).reset_index().head(7)
 
-#avaliaçoes totais
-avaliacoes = df1['Votes'].sum()
-print(avaliacoes)
+#Gráfico
+px.bar(cc, x= 'Country name', y='City', labels = {'Country name': 'Países', 'City':'Cidades registradas'})
 
-#Culinarias cadastradas
-culinaria = df1.loc[:,'Cuisines'].nunique()
-print(culinaria)
+#---------------------------------------
+#MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
+avali_pais = df1.loc[:,['Country name','Votes']].groupby('Country name').mean('Votes').sort_values('Votes', ascending=False).head(7).reset_index()
 
-#Mapa com a localização e avaliação dos restaurantes
-COLORS = {
-"3F7E00": "darkgreen",
-"5BA829": "green",
-"9ACD32": "lightgreen",
-"CDD614": "orange",
-"FFBA00": "red",
-"CBCBC8": "darkred",
-"FF7800": "darkred",
-}
+px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países', 'Votes': 'Média de Avaliações'})
 
-def color_name(color_code):
-    return COLORS.get(color_code, 'gray') # Use .get() for safe access with a default for unknown codes
-
-locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
-
-mapa = folium.Map(
-    location=[0, 0],
-    zoom_start=3,
-    tiles='CartoDB dark_matter'
-)
-
-marker_cluster = MarkerCluster().add_to(mapa)
-
-for _, location_info in locali.iterrows():
-    marker_color = color_name(location_info['Rating color'])
-    folium.CircleMarker(
-        location=[
-            location_info['Latitude'],
-            location_info['Longitude']
-        ],
-        radius=6,
-        color=marker_color,
-        fill=True,
-        fill_color=marker_color,
-        fill_opacity=0.8,
-        popup=(
-            f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
-            f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
-        )
-    ).add_to(marker_cluster)
-
-mapa.save('mapa_restaurantes.html') #testando o mapa, funcionou perfeitamente
+#---------------------------------------
+#MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
+avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
+avg_for_two = avg_for_two.reset_index().head(7)
+px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'}).show()
