@@ -74,7 +74,7 @@ top_rest
 top10_cuisines = df1.loc[:,['Cuisines','Aggregate rating']].groupby('Cuisines').mean('Aggregate rating').sort_values('Aggregate rating', ascending=False).reset_index().head(10)
 
 fig = px.bar(top10_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking'})
-fig.show()
+fig
 
 #------------------------------------------------
 # Analisando as 10 culinárias com as piores avaliações médias
@@ -86,5 +86,5 @@ filtered_df1 = df1.loc[df1['Aggregate rating'] != 0]
 piores_cuisines = filtered_df1.groupby('Cuisines')['Aggregate rating'].mean().sort_values(ascending=False).reset_index().tail(10)
 
 fig = px.bar(piores_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking'})
-fig.show()
+fig
 

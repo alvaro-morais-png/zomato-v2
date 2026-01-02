@@ -4,6 +4,8 @@ import folium
 from folium.plugins import MarkerCluster
 import plotly.graph_objects as go
 import plotly.express as px
+import streamlit as st
+from streamlit_folium import st_folium
 
 #carregando os dados
 df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
@@ -64,26 +66,78 @@ df1 = df1.drop(index=5566)
 # Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
 df1 = df1.reset_index(drop=True)
 
-#===========Inicio do projeto=============
+#===========================================
+#BARRA LATERAL NO STREAMLIT
+#===========================================
+#configurando a página
+st.set_page_config(page_title='Visão Entregadores', layout='wide')
+
+#criando a barra lateral
+st.sidebar.markdown("# Filtros")
+st.sidebar.markdown("### Selecione os países que deseja visualizar o dados:")
+st.sidebar.markdown("""---""")
+
+country_options = st.sidebar.multiselect("Escolha os países:",
+                      options=df1['Country name'].unique().tolist(),
+                      default=df1['Country name'].unique().tolist(),
+                      key='paises')
+#filtrando os dados com base na seleção do usuário
+linhas_selecionadas = df1['Country name'].isin(country_options)
+
+df1 = df1.loc[linhas_selecionadas, :]
+
+
+#===========================================
+#LAYOUT NO STREAMLIT
+#===========================================
+
+st.markdown("# Projeto Zomato")
+st.markdown("### O Melhor lugar para encontrar seu mais novo restaurante favorito!")
+
+with st.container():
+    st.title("Restaurantes cadastrados ao redor do mundo:")
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        st.markdown("##### Restaurantes cadastrados")
+        restaurantes = df1.loc[:,'Restaurant ID'].nunique()
+        col1.metric("restaurantes",restaurantes)
+    with col2:
+        st.markdown("##### Países cadastrados")
+        paises = df1.loc[:,'Country Code'].nunique()
+        col2.metric("países",paises)
+    with col3:
+        st.markdown("##### Cidades cadastradas")
+        cidades = df1.loc[:,'City'].nunique()
+        col3.metric("cidades",cidades)
+    with col4:
+        st.markdown("##### Avaliações totais")
+        avaliacoes = df1['Votes'].sum()
+        col4.metric("avaliações",avaliacoes)
+    with col5:
+        st.markdown("##### Culinárias cadastradas")
+        culinaria = df1.loc[:,'Cuisines'].nunique()
+        col5.metric("culinárias",culinaria)
+
+#código antigo para referência
 #restaurantes cadastrados
-restaurantes = df1.loc[:,'Restaurant ID'].nunique()
-print(restaurantes)
+#restaurantes = df1.loc[:,'Restaurant ID'].nunique()
+#print(restaurantes)
 
 #paises cadastrados
-paises = df1.loc[:,'Country Code'].nunique()
-print(paises)
+#paises = df1.loc[:,'Country Code'].nunique()
+#print(paises)
 
 #cidades cadastrados
-cidades = df1.loc[:,'City'].nunique()
-print(cidades)
+#cidades = df1.loc[:,'City'].nunique()
+#print(cidades)
 
 #avaliaçoes totais
-avaliacoes = df1['Votes'].sum()
-print(avaliacoes)
+#avaliacoes = df1['Votes'].sum()
+#print(avaliacoes)
 
 #Culinarias cadastradas
-culinaria = df1.loc[:,'Cuisines'].nunique()
-print(culinaria)
+#culinaria = df1.loc[:,'Cuisines'].nunique()
+#print(culinaria)
 
 #Mapa com a localização e avaliação dos restaurantes
 COLORS = {
@@ -127,4 +181,4 @@ for _, location_info in locali.iterrows():
         )
     ).add_to(marker_cluster)
 
-mapa.save('mapa_restaurantes.html') #testando o mapa, funcionou perfeitamente
+st_folium(mapa, width=None, height = 600)

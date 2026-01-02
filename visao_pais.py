@@ -91,4 +91,4 @@ px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
 avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
 avg_for_two = avg_for_two.reset_index().head(7)
-px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'}).show()
+px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'})
