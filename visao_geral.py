@@ -74,7 +74,7 @@ st.set_page_config(page_title='Visão Entregadores', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")
-st.sidebar.markdown("### Selecione os países que deseja visualizar o dados:")
+st.sidebar.markdown("### Selecione os países para visualizar o dados:")
 st.sidebar.markdown("""---""")
 
 country_options = st.sidebar.multiselect("Escolha os países:",
