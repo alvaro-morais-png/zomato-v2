@@ -4,6 +4,8 @@ import folium
 from folium.plugins import MarkerCluster
 import plotly.graph_objects as go
 import plotly.express as px
+import streamlit as st
+from streamlit_folium import st_folium
 
 #carregando os dados
 df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
@@ -64,31 +66,69 @@ df1 = df1.drop(index=5566)
 # Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
 df1 = df1.reset_index(drop=True)
 
-#=============Inicio do projeto=============
+#===========================================
+#BARRA LATERAL NO STREAMLIT
+#===========================================
+#configurando a página
+st.set_page_config(page_title='Visão Países', layout='wide')
+
+#criando a barra lateral
+st.sidebar.markdown("# Filtros")
+st.sidebar.markdown("### Selecione os países para visualizar o dados:")
+st.sidebar.markdown("""---""")
+
+country_options = st.sidebar.multiselect("Escolha os países:",
+                      options=df1['Country name'].unique().tolist(),
+                      default=df1['Country name'].unique().tolist(),
+                      key='paises')
+#filtrando os dados com base na seleção do usuário
+linhas_selecionadas = df1['Country name'].isin(country_options)
+
+df1 = df1.loc[linhas_selecionadas, :]
+
+#===========================================
+#LAYOUT NO STREAMLIT
+#===========================================
+st.markdown("# VISÃO PAÍSES")
+
+with st.container():
+  st.markdown("## Quantidade de restaurantes registrados por país")
 #QUANTIDADE DE RESTAURANTES CADASTRADOS POR PAIS
-pais_rest = df1.loc[:,['Country name', 'Restaurant ID']].groupby('Country name')['Restaurant ID'].nunique().sort_values(ascending=False)
-pais_rest = pais_rest.reset_index().head(7)
+  pais_rest = df1.loc[:,['Country name', 'Restaurant ID']].groupby('Country name')['Restaurant ID'].nunique().sort_values(ascending=False)
+  pais_rest = pais_rest.reset_index().head(7)
 
 # Encontrar a linha com o maior número de restaurantes
-linha_mais_restaurantes = pais_rest.loc[pais_rest['Restaurant ID'].idxmax()]
+  linha_mais_restaurantes = pais_rest.loc[pais_rest['Restaurant ID'].idxmax()]
 #grafico
-px.bar (pais_rest, x='Country name', y='Restaurant ID', labels={'Country name':'Países', 'Restaurant ID': 'Quantidade de Resutaurantes'})
+  fig = px.bar (pais_rest, x='Country name', y='Restaurant ID', labels={'Country name':'Países', 'Restaurant ID': 'Quantidade de Resutaurantes'}, color = "Country name")
+  st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
 #QUANTIDADE DE CIDADE REGISTRADAS POR PAIS
-cc = df1.loc[:,['Country name','City']].groupby('Country name')['City'].nunique().sort_values(ascending=False).reset_index().head(7)
-
+with st.container():
+  st.markdown("""---""")
+  st.markdown("## Quantidade de cidades registradas por país")
+  cc = df1.loc[:,['Country name','City']].groupby('Country name')['City'].nunique().sort_values(ascending=False).reset_index().head(7)
 #Gráfico
-px.bar(cc, x= 'Country name', y='City', labels = {'Country name': 'Países', 'City':'Cidades registradas'})
+  fig = px.bar(cc, x= 'Country name', y='City', labels = {'Country name': 'Países', 'City':'Cidades registradas'}, color='Country name')
+  st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
+st.markdown("""---""")
+st.markdown("## Outros indicadores por país")
+with st.container():
+  col1, col2 = st.columns(2)
+  with col1:
+    st.markdown("### Média de avaliações feitas por país")
 #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
-avali_pais = df1.loc[:,['Country name','Votes']].groupby('Country name').mean('Votes').sort_values('Votes', ascending=False).head(7).reset_index()
+    avali_pais = df1.loc[:,['Country name','Votes']].groupby('Country name').mean('Votes').sort_values('Votes', ascending=False).head(7).reset_index()
 
-px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países', 'Votes': 'Média de Avaliações'})
-
-#---------------------------------------
+    fig = px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países', 'Votes': 'Média de Avaliações'}, color='Country name')
+    st.plotly_chart(fig, use_container_width=True)
+  with col2:
+    st.markdown("### Média de preço de um prato para dois por país")
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
-avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
-avg_for_two = avg_for_two.reset_index().head(7)
-px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'})
+    avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
+    avg_for_two = avg_for_two.reset_index().head(7)
+    fig = px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'}, color='Country name')
+    st.plotly_chart(fig, use_container_width=True)
