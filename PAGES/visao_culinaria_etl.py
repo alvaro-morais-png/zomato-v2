@@ -10,6 +10,30 @@ from streamlit_folium import st_folium
 #-----------------------------------------
 #FUNÇÕES
 #-----------------------------------------
+def piores_culinarias(df1):
+    #Analisando as culinárias com piores avaliações médias
+    # Filter out rows where 'Aggregate rating' is 0
+    filtered_df1 = df1.loc[(df1['Aggregate rating'] != 0) & (df1['Votes'] > 100)]
+# Group by 'Cuisines' and calculate the mean of 'Aggregate rating'
+#piores_cuisines = filtered_df1.groupby('Cuisines')['Aggregate rating'].mean().sort_values(['Aggregate rating','Votes'], ascending=False).reset_index().tail(10)
+    piores_cuisines = (
+    filtered_df1
+    .groupby('Cuisines')
+    .agg({
+        'Aggregate rating': 'mean',
+        'Votes': 'sum'   # ou sum, se fizer mais sentido
+    })
+    .sort_values(
+        by=['Aggregate rating', 'Votes'],
+        ascending=[False, False]
+    )
+    .reset_index()
+    .tail(10)
+)
+
+    fig = px.bar(piores_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking', 'Votes':'Quantidade de votos'}, color='Aggregate rating', color_continuous_scale=px.colors.sequential.Reds[::-1])
+    return fig, piores_cuisines
+
 def top_cuisines_avg( df1 ):
     # Analisando as 10 culinárias com as melhores avaliações médias
     top10_cuisines = df1.loc[:,['Cuisines','Country name','Votes', 'Aggregate rating']].groupby('Cuisines').mean('Aggregate rating').sort_values(['Aggregate rating', 'Votes'], ascending=False).reset_index().head(10)
@@ -116,8 +140,6 @@ with st.container():
     st.markdown("## Top restaurantes")
     st.markdown("##### Os restaurantes com mais de 1500 votos e melhores avaliações")
 #Top restaurants
- #   votos_rest = df1.loc[df1['Votes']>1500,['Restaurant Name', 'Country name', 'City','Cuisines', 'Currency','Average Cost for two' ,'Aggregate rating', 'Votes']]
-#    top_rest = votos_rest.loc[:,['Restaurant Name', 'Country name', 'City','Cuisines', 'Currency','Average Cost for two' ,'Aggregate rating', 'Votes']].sort_values(['Aggregate rating', 'Votes'], ascending = False)
     top_rest = top_10rest(df1)
     st.dataframe(top_rest)
 
@@ -137,28 +159,8 @@ with st.container():
     st.markdown("## Top 10 culinárias com as piores avaliações médias")
     st.markdown("##### Piores avaliações médias e maiores quantidade de votos  ")
 # Analisando as 10 culinárias com as piores avaliações médias
-
-# Filter out rows where 'Aggregate rating' is 0
-    filtered_df1 = df1.loc[(df1['Aggregate rating'] != 0) & (df1['Votes'] > 100)]
-
-# Group by 'Cuisines' and calculate the mean of 'Aggregate rating'
-    #piores_cuisines = filtered_df1.groupby('Cuisines')['Aggregate rating'].mean().sort_values(['Aggregate rating','Votes'], ascending=False).reset_index().tail(10)
-    piores_cuisines = (
-    filtered_df1
-    .groupby('Cuisines')
-    .agg({
-        'Aggregate rating': 'mean',
-        'Votes': 'sum'   # ou sum, se fizer mais sentido
-    })
-    .sort_values(
-        by=['Aggregate rating', 'Votes'],
-        ascending=[False, False]
-    )
-    .reset_index()
-    .tail(10)
-)
-
-    fig = px.bar(piores_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking', 'Votes':'Quantidade de votos'}, color='Aggregate rating', color_continuous_scale=px.colors.sequential.Reds[::-1])
+    
+    piores_cuisines, fig = piores_culinarias(df1)
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(piores_cuisines)
 
