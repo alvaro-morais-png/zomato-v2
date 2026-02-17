@@ -70,7 +70,7 @@ df1 = df1.reset_index(drop=True)
 #BARRA LATERAL NO STREAMLIT
 #===========================================
 #configurando a página
-st.set_page_config(page_title='Visão Entregadores', layout='wide')
+st.set_page_config(page_title='Visão Geral', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")
