@@ -159,8 +159,7 @@ with st.container():
     st.markdown("## Top 10 culinárias com as piores avaliações médias")
     st.markdown("##### Piores avaliações médias e maiores quantidade de votos  ")
 # Analisando as 10 culinárias com as piores avaliações médias
-    
-    piores_cuisines, fig = piores_culinarias(df1)
+    fig, piores_cuisines = piores_culinarias(df1)
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(piores_cuisines)
 

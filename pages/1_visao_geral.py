@@ -12,37 +12,38 @@ from streamlit_folium import st_folium
 #-----------------------------------------
 
 def map(df1):
-    locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
+    with st.spinner('🌎 Renderizando o mapa e agrupando restaurantes...'):
+        locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
 
-    mapa = folium.Map(
-        location=[0, 0],
-        zoom_start=3,
-        tiles='CartoDB dark_matter',
-        prefer_canvas=True
-    )
+        mapa = folium.Map(
+            location=[0, 0],
+            zoom_start=3,
+            tiles='CartoDB dark_matter',
+            prefer_canvas=True
+        )
 
-    marker_cluster = MarkerCluster().add_to(mapa)
+        marker_cluster = MarkerCluster().add_to(mapa)
 
-    for _, location_info in locali.iterrows():
-        marker_color = color_function(location_info['Rating color'])
-        folium.CircleMarker(
-            location=[
-                location_info['Latitude'],
-                location_info['Longitude']
-            ],
-            radius=6,
-            color=marker_color,
-            fill=True,
-            fill_color=marker_color,
-            fill_opacity=0.8,
-            popup=(
-                f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
-                f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
-            )
-        ).add_to(marker_cluster)
+        for _, location_info in locali.iterrows():
+            marker_color = color_function(location_info['Rating color'])
+            folium.CircleMarker(
+                location=[
+                    location_info['Latitude'],
+                    location_info['Longitude']
+                ],
+                radius=6,
+                color=marker_color,
+                fill=True,
+                fill_color=marker_color,
+                fill_opacity=0.8,
+                popup=(
+                    f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
+                    f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
+                )
+            ).add_to(marker_cluster)
 
-    fig = st_folium(mapa, width=None, height = 600)
-    return fig
+        fig = st_folium(mapa, width=None, height = 600)
+        return fig
 
 def color_function(color_code):
     COLORS = {
