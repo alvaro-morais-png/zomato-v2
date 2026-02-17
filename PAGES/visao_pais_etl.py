@@ -7,64 +7,102 @@ import plotly.express as px
 import streamlit as st
 from streamlit_folium import st_folium
 
-#carregando os dados
+#-----------------------------------------
+#FUNÇÕES
+#-----------------------------------------
+def avg_fottwo(df1):
+  #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
+  avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
+  avg_for_two = avg_for_two.reset_index().head(7)
+  fig = px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'}, color='Country name')
+  return fig
+
+def hating_country(df1):
+  #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
+  avali_pais = df1.loc[:,['Country name','Votes']].groupby('Country name').mean('Votes').sort_values('Votes', ascending=False).head(7).reset_index()
+  fig = px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países', 'Votes': 'Média de Avaliações'}, color='Country name')
+  return fig
+
+def city_country(df1):
+  #QUANTIDADE DE CIDADES REGISTRADAS POR PAIS
+  cc = df1.loc[:,['Country name','City']].groupby('Country name')['City'].nunique().sort_values(ascending=False).reset_index().head(7)
+#Gráfico
+  fig = px.bar(cc, x= 'Country name', y='City', labels = {'Country name': 'Países', 'City':'Cidades registradas'}, color='Country name')
+  return fig
+
+def rest_pais(df1):
+  #QUANTIDADE DE RESTAURANTES CADASTRADOS POR PAIS
+  pais_rest = df1.loc[:,['Country name', 'Restaurant ID']].groupby('Country name')['Restaurant ID'].nunique().sort_values(ascending=False)
+  pais_rest = pais_rest.reset_index().head(7)
+#grafico
+  fig = px.bar (pais_rest, x='Country name', y='Restaurant ID', labels={'Country name':'Países', 'Restaurant ID': 'Quantidade de Resutaurantes'}, color = "Country name")
+  return fig
+
+def clean_code( df ):
+  #===========limpando os dados=============
+  #Arrancando a coluna 'Switch to order menu'
+  df1 = df.drop(columns=['Switch to order menu'])
+
+  #Eliminando linhas vazias
+  df1 = df1.dropna()
+  df1.reset_index(drop=True, inplace=True)
+
+  #Eliminando linhas duplicadas
+  df1=df1.drop_duplicates()
+  df1=df1.reset_index(drop=True)
+
+  #COLOCANDO NOMES NOS PAÍSES
+  COUNTRIES = {
+  1: "India",
+  14: "Australia",
+  30: "Brazil",
+  37: "Canada",
+  94: "Indonesia",
+  148: "New Zeland",
+  162: "Philippines",
+  166: "Qatar",
+  184: "Singapure",
+  189: "South Africa",
+  191: "Sri Lanka",
+  208: "Turkey",
+  214: "United Arab Emirates",
+  215: "England",
+  216: "United States of America",
+  }
+  def country_name(country_id):
+      return COUNTRIES[country_id]
+  df1['Country name'] = df1['Country Code'].apply(country_name)
+
+  #TRANSFORMANDO STRING E NUMEROS
+  df1['Restaurant ID'] = df1['Restaurant ID'].astype(float)
+  df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
+  df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
+  df1['Restaurant Name'] = df1['Restaurant Name'].astype(str)
+  df1['City'] = df1['City'].astype(str)
+  df1['Address'] = df1['Address'].astype(str)
+  df1['Cuisines'] = df1['Cuisines'].astype(str)
+  df1['Currency'] = df1['Currency'].astype(str)
+  df1['Rating color'] = df1['Rating color'].astype(str)
+  df1['Rating text'] = df1['Rating text'].astype(str)
+  df1['Country name'] = df1['Country name'].astype(str)
+
+  #ELIMINANDO OUTLIERS
+  # Para remover a linha na posição de índice 356, você deve passar o rótulo do índice diretamente.
+  df1 = df1.drop(index=356)
+  df1 = df1.drop(index=5566)
+  # Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
+  df1 = df1.reset_index(drop=True)
+
+  return df1
+
+#=================INICIO DA ESTRUTURA LÓGICA DO CÓDIGO======================
+#==================
+#IMPORT DATASET
 df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
-df1 = df.copy()
 
-#===========limpando os dados=============
-#Arrancando a coluna 'Switch to order menu'
-df1 = df.drop(columns=['Switch to order menu'])
-
-#Eliminando linhas vazias
-df1 = df1.dropna()
-df1.reset_index(drop=True, inplace=True)
-
-#Eliminando linhas duplicadas
-df1=df1.drop_duplicates()
-df1=df1.reset_index(drop=True)
-
-#INSIRINDO A LISTA DE NOMES DE CADA PAIS DE ACORDO COM O CÓDIGO
-
-COUNTRIES = {
-1: "India",
-14: "Australia",
-30: "Brazil",
-37: "Canada",
-94: "Indonesia",
-148: "New Zeland",
-162: "Philippines",
-166: "Qatar",
-184: "Singapure",
-189: "South Africa",
-191: "Sri Lanka",
-208: "Turkey",
-214: "United Arab Emirates",
-215: "England",
-216: "United States of America",
-}
-def country_name(country_id):
-  return COUNTRIES[country_id]
-df1['Country name'] = df1['Country Code'].apply(country_name)
-
-#TRANSFORMANDO STRING E NUMEROS
-df1['Restaurant ID'] = df1['Restaurant ID'].astype(float)
-df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
-df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
-df1['Restaurant Name'] = df1['Restaurant Name'].astype(str)
-df1['City'] = df1['City'].astype(str)
-df1['Address'] = df1['Address'].astype(str)
-df1['Cuisines'] = df1['Cuisines'].astype(str)
-df1['Currency'] = df1['Currency'].astype(str)
-df1['Rating color'] = df1['Rating color'].astype(str)
-df1['Rating text'] = df1['Rating text'].astype(str)
-df1['Country name'] = df1['Country name'].astype(str)
-
-#ELIMINANDO OUTLIERS
-# Para remover a linha na posição de índice 356, você deve passar o rótulo do índice diretamente.
-df1 = df1.drop(index=356)
-df1 = df1.drop(index=5566)
-# Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
-df1 = df1.reset_index(drop=True)
+#==================
+#LIMPANDO OS DADOS
+df1= clean_code( df )
 
 #===========================================
 #BARRA LATERAL NO STREAMLIT
@@ -94,23 +132,15 @@ st.markdown("# VISÃO PAÍSES")
 with st.container():
   st.markdown("## Quantidade de restaurantes registrados por país")
 #QUANTIDADE DE RESTAURANTES CADASTRADOS POR PAIS
-  pais_rest = df1.loc[:,['Country name', 'Restaurant ID']].groupby('Country name')['Restaurant ID'].nunique().sort_values(ascending=False)
-  pais_rest = pais_rest.reset_index().head(7)
-
-# Encontrar a linha com o maior número de restaurantes
-  linha_mais_restaurantes = pais_rest.loc[pais_rest['Restaurant ID'].idxmax()]
-#grafico
-  fig = px.bar (pais_rest, x='Country name', y='Restaurant ID', labels={'Country name':'Países', 'Restaurant ID': 'Quantidade de Resutaurantes'}, color = "Country name")
+  fig = rest_pais(df1)
   st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
-#QUANTIDADE DE CIDADE REGISTRADAS POR PAIS
 with st.container():
   st.markdown("""---""")
   st.markdown("## Quantidade de cidades registradas por país")
-  cc = df1.loc[:,['Country name','City']].groupby('Country name')['City'].nunique().sort_values(ascending=False).reset_index().head(7)
-#Gráfico
-  fig = px.bar(cc, x= 'Country name', y='City', labels = {'Country name': 'Países', 'City':'Cidades registradas'}, color='Country name')
+  #QUANTIDADE DE CIDADES REGISTRADAS POR PAIS
+  fig = city_country(df1)
   st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
@@ -118,17 +148,15 @@ st.markdown("""---""")
 st.markdown("## Outros indicadores por país")
 with st.container():
   col1, col2 = st.columns(2)
+
   with col1:
     st.markdown("### Média de avaliações feitas por país")
 #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
-    avali_pais = df1.loc[:,['Country name','Votes']].groupby('Country name').mean('Votes').sort_values('Votes', ascending=False).head(7).reset_index()
-
-    fig = px.bar(avali_pais, x='Country name', y='Votes', labels={'Country name': 'Países', 'Votes': 'Média de Avaliações'}, color='Country name')
+    fig = hating_country(df1)
     st.plotly_chart(fig, use_container_width=True)
+
   with col2:
-    st.markdown("### Média de preço de um prato para dois por país")
+    st.markdown("### Média de preço de um prato para dois por país, na moeda local")
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
-    avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
-    avg_for_two = avg_for_two.reset_index().head(7)
-    fig = px.bar(avg_for_two, x='Country name', y= 'Average Cost for two', labels={'Country name': 'Países', 'Average Cost for two': 'Média de Preço de um Prato para Dois'}, color='Country name')
+    fig = avg_fottwo(df1)
     st.plotly_chart(fig, use_container_width=True)
