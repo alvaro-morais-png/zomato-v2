@@ -7,64 +7,123 @@ import plotly.express as px
 import streamlit as st
 from streamlit_folium import st_folium
 
-#carregando os dados
+#-----------------------------------------
+#FUNÇÕES
+#-----------------------------------------
+
+def map(df1):
+    locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
+
+    mapa = folium.Map(
+        location=[0, 0],
+        zoom_start=3,
+        tiles='CartoDB dark_matter',
+        prefer_canvas=True
+    )
+
+    marker_cluster = MarkerCluster().add_to(mapa)
+
+    for _, location_info in locali.iterrows():
+        marker_color = color_function(location_info['Rating color'])
+        folium.CircleMarker(
+            location=[
+                location_info['Latitude'],
+                location_info['Longitude']
+            ],
+            radius=6,
+            color=marker_color,
+            fill=True,
+            fill_color=marker_color,
+            fill_opacity=0.8,
+            popup=(
+                f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
+                f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
+            )
+        ).add_to(marker_cluster)
+
+    fig = st_folium(mapa, width=None, height = 600)
+    return fig
+
+def color_function(color_code):
+    COLORS = {
+        "3F7E00": "darkgreen",
+        "5BA829": "green",
+        "9ACD32": "lightgreen",
+        "CDD614": "orange",
+        "FFBA00": "red",
+        "CBCBC8": "darkred",
+        "FF7800": "darkred",
+    }
+    
+    return COLORS.get(color_code, "gray")
+
+def clean_code( df ):
+    #===========limpando os dados=============
+    #Arrancando a coluna 'Switch to order menu'
+    df1 = df.drop(columns=['Switch to order menu'])
+
+    #Eliminando linhas vazias
+    df1 = df1.dropna()
+    df1.reset_index(drop=True, inplace=True)
+
+    #Eliminando linhas duplicadas
+    df1=df1.drop_duplicates()
+    df1=df1.reset_index(drop=True)
+
+    #COLOCANDO NOMES NOS PAÍSES
+    COUNTRIES = {
+    1: "India",
+    14: "Australia",
+    30: "Brazil",
+    37: "Canada",
+    94: "Indonesia",
+    148: "New Zeland",
+    162: "Philippines",
+    166: "Qatar",
+    184: "Singapure",
+    189: "South Africa",
+    191: "Sri Lanka",
+    208: "Turkey",
+    214: "United Arab Emirates",
+    215: "England",
+    216: "United States of America",
+    }
+    def country_name(country_id):
+        return COUNTRIES[country_id]
+    df1['Country name'] = df1['Country Code'].apply(country_name)
+
+    #TRANSFORMANDO STRING E NUMEROS
+    df1['Restaurant ID'] = df1['Restaurant ID'].astype(float)
+    df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
+    df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
+    df1['Restaurant Name'] = df1['Restaurant Name'].astype(str)
+    df1['City'] = df1['City'].astype(str)
+    df1['Address'] = df1['Address'].astype(str)
+    df1['Cuisines'] = df1['Cuisines'].astype(str)
+    df1['Currency'] = df1['Currency'].astype(str)
+    df1['Rating color'] = df1['Rating color'].astype(str)
+    df1['Rating text'] = df1['Rating text'].astype(str)
+    df1['Country name'] = df1['Country name'].astype(str)
+
+    #ELIMINANDO OUTLIERS
+    # Para remover a linha na posição de índice 356, você deve passar o rótulo do índice diretamente.
+    df1 = df1.drop(index=356)
+    df1 = df1.drop(index=5566)
+    # Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
+    df1 = df1.reset_index(drop=True)
+
+    return df1
+
+#=================INICIO DA ESTRUTURA LÓGICA DO CÓDIGO======================
+#==================
+
+#IMPORT DATASET
 df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
-df1 = df.copy()
 
-#===========limpando os dados=============
-#Arrancando a coluna 'Switch to order menu'
-df1 = df.drop(columns=['Switch to order menu'])
 
-#Eliminando linhas vazias
-df1 = df1.dropna()
-df1.reset_index(drop=True, inplace=True)
-
-#Eliminando linhas duplicadas
-df1=df1.drop_duplicates()
-df1=df1.reset_index(drop=True)
-
-#INSIRINDO A LISTA DE NOMES DE CADA PAIS DE ACORDO COM O CÓDIGO
-
-COUNTRIES = {
-1: "India",
-14: "Australia",
-30: "Brazil",
-37: "Canada",
-94: "Indonesia",
-148: "New Zeland",
-162: "Philippines",
-166: "Qatar",
-184: "Singapure",
-189: "South Africa",
-191: "Sri Lanka",
-208: "Turkey",
-214: "United Arab Emirates",
-215: "England",
-216: "United States of America",
-}
-def country_name(country_id):
-  return COUNTRIES[country_id]
-df1['Country name'] = df1['Country Code'].apply(country_name)
-
-#TRANSFORMANDO STRING E NUMEROS
-df1['Restaurant ID'] = df1['Restaurant ID'].astype(float)
-df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
-df1['Average Cost for two'] = df1['Average Cost for two'].astype(float)
-df1['Restaurant Name'] = df1['Restaurant Name'].astype(str)
-df1['City'] = df1['City'].astype(str)
-df1['Address'] = df1['Address'].astype(str)
-df1['Cuisines'] = df1['Cuisines'].astype(str)
-df1['Currency'] = df1['Currency'].astype(str)
-df1['Rating color'] = df1['Rating color'].astype(str)
-df1['Rating text'] = df1['Rating text'].astype(str)
-df1['Country name'] = df1['Country name'].astype(str)
-
-#ELIMINANDO OUTLIERS
-# Para remover a linha na posição de índice 356, você deve passar o rótulo do índice diretamente.
-df1 = df1.drop(index=356)
-df1 = df1.drop(index=5566)
-# Reindexar o DataFrame após a remoção, para manter os índices sequenciais se necessário.
-df1 = df1.reset_index(drop=True)
+#==================
+#LIMPANDO OS DADOS
+df1= clean_code( df )
 
 #===========================================
 #BARRA LATERAL NO STREAMLIT
@@ -118,67 +177,7 @@ with st.container():
         culinaria = df1.loc[:,'Cuisines'].nunique()
         col5.metric("culinárias",culinaria)
 
-#código antigo para referência
-#restaurantes cadastrados
-#restaurantes = df1.loc[:,'Restaurant ID'].nunique()
-#print(restaurantes)
 
-#paises cadastrados
-#paises = df1.loc[:,'Country Code'].nunique()
-#print(paises)
-
-#cidades cadastrados
-#cidades = df1.loc[:,'City'].nunique()
-#print(cidades)
-
-#avaliaçoes totais
-#avaliacoes = df1['Votes'].sum()
-#print(avaliacoes)
-
-#Culinarias cadastradas
-#culinaria = df1.loc[:,'Cuisines'].nunique()
-#print(culinaria)
-
-#Mapa com a localização e avaliação dos restaurantes
-COLORS = {
-"3F7E00": "darkgreen",
-"5BA829": "green",
-"9ACD32": "lightgreen",
-"CDD614": "orange",
-"FFBA00": "red",
-"CBCBC8": "darkred",
-"FF7800": "darkred",
-}
-
-def color_name(color_code):
-    return COLORS.get(color_code, 'gray') # Use .get() for safe access with a default for unknown codes
-
-locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
-
-mapa = folium.Map(
-    location=[0, 0],
-    zoom_start=3,
-    tiles='CartoDB dark_matter'
-)
-
-marker_cluster = MarkerCluster().add_to(mapa)
-
-for _, location_info in locali.iterrows():
-    marker_color = color_name(location_info['Rating color'])
-    folium.CircleMarker(
-        location=[
-            location_info['Latitude'],
-            location_info['Longitude']
-        ],
-        radius=6,
-        color=marker_color,
-        fill=True,
-        fill_color=marker_color,
-        fill_opacity=0.8,
-        popup=(
-            f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
-            f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
-        )
-    ).add_to(marker_cluster)
-
-st_folium(mapa, width=None, height = 600)
+with st.container():
+    st.markdown("""---""")
+    fig = map(df1)
