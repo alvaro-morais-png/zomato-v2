@@ -177,7 +177,7 @@ with st.container():
         culinaria = df1.loc[:,'Cuisines'].nunique()
         col5.metric("culinárias",culinaria)
 
-
+#---------------------------------------------------
 with st.container():
     st.markdown("""---""")
     fig = map(df1)

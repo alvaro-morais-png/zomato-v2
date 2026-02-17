@@ -145,18 +145,18 @@ with st.container():
 
 #---------------------------------------
 st.markdown("""---""")
-st.markdown("## Outros indicadores por país")
+st.markdown("## Outros indicadores por país",text_alignment="center")
 with st.container():
   col1, col2 = st.columns(2)
 
   with col1:
-    st.markdown("### Média de avaliações feitas por país")
+    st.markdown("##### Média de avaliações feitas por país", text_alignment="center")
 #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
     fig = hating_country(df1)
     st.plotly_chart(fig, use_container_width=True)
 
   with col2:
-    st.markdown("### Média de preço de um prato para dois por país, na moeda local")
+    st.markdown("##### Média de preço de um prato para dois por país, na moeda local", text_alignment="center")
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
     fig = avg_fottwo(df1)
     st.plotly_chart(fig, use_container_width=True)

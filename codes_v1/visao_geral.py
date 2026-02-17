@@ -70,7 +70,7 @@ df1 = df1.reset_index(drop=True)
 #BARRA LATERAL NO STREAMLIT
 #===========================================
 #configurando a página
-st.set_page_config(page_title='Visão Geral', layout='wide')
+st.set_page_config(page_title='Visão Culinária', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")
@@ -86,99 +86,58 @@ linhas_selecionadas = df1['Country name'].isin(country_options)
 
 df1 = df1.loc[linhas_selecionadas, :]
 
-
 #===========================================
 #LAYOUT NO STREAMLIT
 #===========================================
-
-st.markdown("# Projeto Zomato")
-st.markdown("### O Melhor lugar para encontrar seu mais novo restaurante favorito!")
-
 with st.container():
-    st.title("Restaurantes cadastrados ao redor do mundo:")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.markdown("##### Restaurantes cadastrados")
-        restaurantes = df1.loc[:,'Restaurant ID'].nunique()
-        col1.metric("restaurantes",restaurantes)
-    with col2:
-        st.markdown("##### Países cadastrados")
-        paises = df1.loc[:,'Country Code'].nunique()
-        col2.metric("países",paises)
-    with col3:
-        st.markdown("##### Cidades cadastradas")
-        cidades = df1.loc[:,'City'].nunique()
-        col3.metric("cidades",cidades)
-    with col4:
-        st.markdown("##### Avaliações totais")
-        avaliacoes = df1['Votes'].sum()
-        col4.metric("avaliações",avaliacoes)
-    with col5:
-        st.markdown("##### Culinárias cadastradas")
-        culinaria = df1.loc[:,'Cuisines'].nunique()
-        col5.metric("culinárias",culinaria)
+    st.markdown("# VISÃO CULINÁRIA")
+    st.markdown("## Top restaurantes")
+    st.markdown("##### Os restaurantes com mais de 1500 votos e melhores avaliações")
+#Top restaurants
+    votos_rest = df1.loc[df1['Votes']>1500,['Restaurant Name', 'Country name', 'City','Cuisines', 'Currency','Average Cost for two' ,'Aggregate rating', 'Votes']]
+    top_rest = votos_rest.loc[:,['Restaurant Name', 'Country name', 'City','Cuisines', 'Currency','Average Cost for two' ,'Aggregate rating', 'Votes']].sort_values(['Aggregate rating', 'Votes'], ascending = False)
+    st.dataframe(top_rest)
 
-#código antigo para referência
-#restaurantes cadastrados
-#restaurantes = df1.loc[:,'Restaurant ID'].nunique()
-#print(restaurantes)
+#------------------------------------------------
+with st.container():
+    st.markdown("""---""")
+    st.markdown("## Top 10 culinárias com as melhores avaliações médias")
+    st.markdown("##### Melhores avaliações médias e maiores quantidade de votos  ")
+# Analisando as 10 culinárias com as melhores avaliações médias
+    top10_cuisines = df1.loc[:,['Cuisines','Country name','Votes', 'Aggregate rating']].groupby('Cuisines').mean('Aggregate rating').sort_values(['Aggregate rating', 'Votes'], ascending=False).reset_index().head(10)
 
-#paises cadastrados
-#paises = df1.loc[:,'Country Code'].nunique()
-#print(paises)
+    fig = px.bar(top10_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking'}, color='Votes')
+    st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(top10_cuisines)
 
-#cidades cadastrados
-#cidades = df1.loc[:,'City'].nunique()
-#print(cidades)
+#------------------------------------------------
+with st.container():
+    st.markdown("""---""")
+    st.markdown("## Top 10 culinárias com as piores avaliações médias")
+    st.markdown("##### Piores avaliações médias e maiores quantidade de votos  ")
+# Analisando as 10 culinárias com as piores avaliações médias
 
-#avaliaçoes totais
-#avaliacoes = df1['Votes'].sum()
-#print(avaliacoes)
+# Filter out rows where 'Aggregate rating' is 0
+    filtered_df1 = df1.loc[(df1['Aggregate rating'] != 0) & (df1['Votes'] > 100)]
 
-#Culinarias cadastradas
-#culinaria = df1.loc[:,'Cuisines'].nunique()
-#print(culinaria)
-
-#Mapa com a localização e avaliação dos restaurantes
-COLORS = {
-"3F7E00": "darkgreen",
-"5BA829": "green",
-"9ACD32": "lightgreen",
-"CDD614": "orange",
-"FFBA00": "red",
-"CBCBC8": "darkred",
-"FF7800": "darkred",
-}
-
-def color_name(color_code):
-    return COLORS.get(color_code, 'gray') # Use .get() for safe access with a default for unknown codes
-
-locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
-
-mapa = folium.Map(
-    location=[0, 0],
-    zoom_start=3,
-    tiles='CartoDB dark_matter'
+# Group by 'Cuisines' and calculate the mean of 'Aggregate rating'
+    #piores_cuisines = filtered_df1.groupby('Cuisines')['Aggregate rating'].mean().sort_values(['Aggregate rating','Votes'], ascending=False).reset_index().tail(10)
+    piores_cuisines = (
+    filtered_df1
+    .groupby('Cuisines')
+    .agg({
+        'Aggregate rating': 'mean',
+        'Votes': 'sum'   # ou sum, se fizer mais sentido
+    })
+    .sort_values(
+        by=['Aggregate rating', 'Votes'],
+        ascending=[False, False]
+    )
+    .reset_index()
+    .tail(10)
 )
 
-marker_cluster = MarkerCluster().add_to(mapa)
+    fig = px.bar(piores_cuisines, x= 'Cuisines', y='Aggregate rating', labels={'Cuisines':'Culinária', 'Aggregate rating':'Ranking', 'Votes':'Quantidade de votos'}, color='Aggregate rating', color_continuous_scale=px.colors.sequential.Reds[::-1])
+    st.plotly_chart(fig, use_container_width=True)
+    st.dataframe(piores_cuisines)
 
-for _, location_info in locali.iterrows():
-    marker_color = color_name(location_info['Rating color'])
-    folium.CircleMarker(
-        location=[
-            location_info['Latitude'],
-            location_info['Longitude']
-        ],
-        radius=6,
-        color=marker_color,
-        fill=True,
-        fill_color=marker_color,
-        fill_opacity=0.8,
-        popup=(
-            f"<b>Restaurante:</b> {location_info['Restaurant Name']}<br>"
-            f"<b>Avaliação:</b> {location_info['Aggregate rating']}"
-        )
-    ).add_to(marker_cluster)
-
-st_folium(mapa, width=None, height = 600)
