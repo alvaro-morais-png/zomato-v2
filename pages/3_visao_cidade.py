@@ -6,10 +6,39 @@ import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
 from streamlit_folium import st_folium
+import base64
 
 #-----------------------------------------
 #FUNÇÕES
 #-----------------------------------------
+def set_bg_with_overlay(image_path, opacity=0.6):
+    #Função para transformar em imagem de fundo
+    #Abre a imagem com o base64, para abrir a imagem no modo binário
+        # f.read() → lê a imagem inteira em bytes
+        # base64.b64encode(...) → converte os bytes em Base64
+        # .decode() → transforma em string (texto)
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, {opacity}),
+                    rgba(0, 0, 0, {opacity})
+                ),
+                url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 def culinaria_distintos(df1):
     #Top 10 CIDADES COM MAIS RESTAURANTES COM TIPOS CULINÁRIOS DISTINTOS
     city_culi = df1.loc[:,['Restaurant ID','Cuisines','City', 'Country name']].groupby(['City','Country name']).nunique('Cuisines').sort_values('Cuisines', ascending=False).reset_index().head(10)
@@ -137,11 +166,21 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #LAYOUT NO STREAMLIT
 #===========================================
+#IMAGEM DE FUNDO
+set_bg_with_overlay(
+    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    opacity=0.7
+)
+
 st.markdown("# VISÃO CIDADE")
 # TOP 60 CIDADES COM MAIS RESTAURANTES
 with st.container():
     st.markdown("## Top 60 cidades com mais restaurantes")
     fig = city_rest(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)
 
 #-------------------------------------------------
@@ -153,6 +192,10 @@ with st.container():
     with col1:
       st.markdown("## Top 7 cidades com mais restaurantes com média de avaliação acima de 4")
       fig = avg_maior(df1)
+      fig.update_layout(
+         paper_bgcolor="rgba(0,0,0,0.5)",
+         plot_bgcolor="rgba(0,0,0,0.5)"
+)
       st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -160,6 +203,10 @@ with st.container():
 #top 7 CIDADES COM RESTAURANTE COM MÉDIA DE AVALIAÇÃO ABAIXO DE 2.5
       st.markdown("## Top 7 cidades com mais restaurantes com média de avaliação abaixo de 2.5")
       fig = avg_menor(df1)
+      fig.update_layout(
+         paper_bgcolor="rgba(0,0,0,0.5)",
+         plot_bgcolor="rgba(0,0,0,0.5)"
+)
       st.plotly_chart(fig, use_container_width=True)
 
 #-------------------------------------------------
@@ -168,4 +215,8 @@ with st.container():
     st.markdown("## Top 10 cidades com mais tipos culinários distintos")
     #Top 10 CIDADES COM MAIS RESTAURANTES COM TIPOS CULINÁRIOS DISTINTOS
     fig = culinaria_distintos(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)

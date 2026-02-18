@@ -6,10 +6,39 @@ import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
 from streamlit_folium import st_folium
+import base64
 
 #-----------------------------------------
 #FUNÇÕES
 #-----------------------------------------
+def set_bg_with_overlay(image_path, opacity=0.6):
+    #Função para transformar em imagem de fundo
+    #Abre a imagem com o base64, para abrir a imagem no modo binário
+        # f.read() → lê a imagem inteira em bytes
+        # base64.b64encode(...) → converte os bytes em Base64
+        # .decode() → transforma em string (texto)
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, {opacity}),
+                    rgba(0, 0, 0, {opacity})
+                ),
+                url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
 def piores_culinarias(df1):
     #Analisando as culinárias com piores avaliações médias
     # Filter out rows where 'Aggregate rating' is 0
@@ -135,6 +164,12 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #LAYOUT NO STREAMLIT
 #===========================================
+#IMAGEM DE FUNDO
+set_bg_with_overlay(
+    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    opacity=0.7
+)
+
 with st.container():
     st.markdown("# VISÃO CULINÁRIA")
     st.markdown("## Top restaurantes")
@@ -150,6 +185,10 @@ with st.container():
     st.markdown("##### Melhores avaliações médias e maiores quantidade de votos  ")
 # Analisando as 10 culinárias com as melhores avaliações médias
     top10_cuisines, fig = top_cuisines_avg(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(top10_cuisines)
 
@@ -160,6 +199,10 @@ with st.container():
     st.markdown("##### Piores avaliações médias e maiores quantidade de votos  ")
 # Analisando as 10 culinárias com as piores avaliações médias
     fig, piores_cuisines = piores_culinarias(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)
     st.dataframe(piores_cuisines)
 

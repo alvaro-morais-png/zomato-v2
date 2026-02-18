@@ -6,10 +6,44 @@ import plotly.graph_objects as go
 import plotly.express as px
 import streamlit as st
 from streamlit_folium import st_folium
+import base64
 
 #-----------------------------------------
 #FUNÇÕES
 #-----------------------------------------
+def set_bg_with_overlay(image_path, opacity=0.6):
+    #Função para transformar em imagem de fundo
+    #Abre a imagem com o base64, para abrir a imagem no modo binário
+        # f.read() → lê a imagem inteira em bytes
+        # base64.b64encode(...) → converte os bytes em Base64
+        # .decode() → transforma em string (texto)
+    with open(image_path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode()
+
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, {opacity}),
+                    rgba(0, 0, 0, {opacity})
+                ),
+                url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+set_bg_with_overlay(
+    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    opacity=0.7
+)
+
 def avg_fottwo(df1):
   #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
   avg_for_two = df1.loc[:,['Country name', 'Currency','Average Cost for two']].groupby(['Country name', 'Currency']).mean('Average Cost for two').sort_values('Average Cost for two', ascending = False)
@@ -127,12 +161,22 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #LAYOUT NO STREAMLIT
 #===========================================
+#IMAGEM DE FUNDO
+set_bg_with_overlay(
+    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    opacity=0.7
+)
+
 st.markdown("# VISÃO PAÍSES")
 
 with st.container():
   st.markdown("## Quantidade de restaurantes registrados por país")
 #QUANTIDADE DE RESTAURANTES CADASTRADOS POR PAIS
   fig = rest_pais(df1)
+  fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0.5)",
+    plot_bgcolor="rgba(0,0,0,0.5)"
+)
   st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
@@ -141,6 +185,10 @@ with st.container():
   st.markdown("## Quantidade de cidades registradas por país")
   #QUANTIDADE DE CIDADES REGISTRADAS POR PAIS
   fig = city_country(df1)
+  fig.update_layout(
+    paper_bgcolor="rgba(0,0,0,0.5)",
+    plot_bgcolor="rgba(0,0,0,0.5)"
+) 
   st.plotly_chart(fig, use_container_width=True)
 
 #---------------------------------------
@@ -153,10 +201,18 @@ with st.container():
     st.markdown("##### Média de avaliações feitas por país", text_alignment="center")
 #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
     fig = hating_country(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)
 
   with col2:
     st.markdown("##### Média de preço de um prato para dois por país, na moeda local", text_alignment="center")
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
     fig = avg_fottwo(df1)
+    fig.update_layout(
+      paper_bgcolor="rgba(0,0,0,0.5)",
+      plot_bgcolor="rgba(0,0,0,0.5)"
+)
     st.plotly_chart(fig, use_container_width=True)
