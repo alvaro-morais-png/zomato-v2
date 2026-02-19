@@ -40,7 +40,7 @@ def set_bg_with_overlay(image_path, opacity=0.6):
     )
 
 set_bg_with_overlay(
-    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    "./imagens/fundo.jpg",
     opacity=0.7
 )
 
@@ -132,7 +132,7 @@ def clean_code( df ):
 #=================INICIO DA ESTRUTURA LÓGICA DO CÓDIGO======================
 #==================
 #IMPORT DATASET
-df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
+df = pd.read_csv('./dataset/zomato.csv')
 
 #==================
 #LIMPANDO OS DADOS
@@ -163,7 +163,7 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #IMAGEM DE FUNDO
 set_bg_with_overlay(
-    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    "./imagens/fundo.jpg",
     opacity=0.7
 )
 

@@ -149,7 +149,7 @@ def clean_code( df ):
 #==================
 
 #IMPORT DATASET
-df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
+df = pd.read_csv('./dataset/zomato.csv')
 
 
 #==================
@@ -160,7 +160,7 @@ df1= clean_code( df )
 #BARRA LATERAL NO STREAMLIT
 #===========================================
 #configurando a página
-st.set_page_config(page_title='Visão Entregadores', layout='wide')
+st.set_page_config(page_title='Visão geral', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")
@@ -182,7 +182,7 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #IMAGEM DE FUNDO
 set_bg_with_overlay(
-    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    "./imagens/fundo.jpg",
     opacity=0.7
 )
 

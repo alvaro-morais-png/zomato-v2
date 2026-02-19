@@ -11,7 +11,7 @@ st.set_page_config(
 #BARRA LATERAL NO STREAMLIT
 #===========================================
 #configurando a página
-st.set_page_config(page_title='Visão Entregadores', layout='wide')
+st.set_page_config(page_title='Home', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Projeto Zomato")
@@ -54,7 +54,7 @@ def set_bg_with_overlay(image_path, opacity=0.6):
     )
 
 set_bg_with_overlay(
-    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    "./imagens/fundo.jpg",
     opacity=0.7
 )
 

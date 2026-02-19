@@ -135,7 +135,7 @@ def clean_code( df ):
 #==================
 
 #IMPORT DATASET
-df = pd.read_csv('/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/dataset/zomato.csv')
+df = pd.read_csv('./dataset/zomato.csv')
 
 
 #==================
@@ -168,7 +168,7 @@ df1 = df1.loc[linhas_selecionadas, :]
 #===========================================
 #IMAGEM DE FUNDO
 set_bg_with_overlay(
-    "/home/alvaro/Documentos/alvaro/comunidadeds/projetos/projeto_zomato/imagens/fundo.jpg",
+    "./imagens/fundo.jpg",
     opacity=0.7
 )
 
