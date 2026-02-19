@@ -62,6 +62,6 @@ with st.container():
             """ 
             ### A análise do dataset do Zomato é uma ferramenta muito útil para os amantes da gastronomia que desejam experimentar as melhores culinárias em várias partes do mundo.
             ### O conjunto de dados permite que os usuários encontrem os restaurantes mais populares em suas respectivas cidades ao redor do globo.
-            ### Também permite fazer leitura dos diferentes tipos de culinárias por cidade e por pais.""",text_alignment="justify", 
+            ### Também permite fazer leitura dos diferentes tipos de culinárias por cidade e por pais.""" 
         )
 
