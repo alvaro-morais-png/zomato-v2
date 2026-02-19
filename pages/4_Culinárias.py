@@ -144,8 +144,6 @@ df1= clean_code( df )
 #===========================================
 #BARRA LATERAL NO STREAMLIT
 #===========================================
-#configurando a página
-st.set_page_config(page_title='Visão Culinária', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")

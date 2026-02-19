@@ -2,6 +2,9 @@
 import streamlit as st
 import base64
 
+#configurando a página
+st.set_page_config(page_title='Home', layout='wide')
+
 st.set_page_config(
     page_title="Home"
 
@@ -10,8 +13,6 @@ st.set_page_config(
 #===========================================
 #BARRA LATERAL NO STREAMLIT
 #===========================================
-#configurando a página
-st.set_page_config(page_title='Home', layout='wide')
 
 #criando a barra lateral
 st.sidebar.markdown("# Projeto Zomato")
