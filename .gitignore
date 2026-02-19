@@ -45,8 +45,3 @@ Thumbs.db
 .build/
 dist/
 *.egg-info/
-
-# ===============================
-# Dados locais
-# ===============================
-dataset/
