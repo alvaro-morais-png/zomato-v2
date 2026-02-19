@@ -41,7 +41,7 @@ def set_bg_with_overlay(image_path, opacity=0.6):
     )
 
 
-def map(df1):
+def m(df1):
     with st.spinner('🌎 Renderizando o mapa e agrupando restaurantes... Aguarde um instante devido ao tamanho da base de dados'):
         locali = df1.loc[:, ['Restaurant Name','City','Aggregate rating','Latitude','Longitude', 'Rating color']]
 
@@ -215,4 +215,4 @@ with st.container():
 #---------------------------------------------------
 with st.container():
     st.markdown("""---""")
-    fig = map(df1)
+    fig = m(df1)

@@ -142,6 +142,7 @@ df1= clean_code( df )
 #BARRA LATERAL NO STREAMLIT
 #===========================================
 
+
 #criando a barra lateral
 st.sidebar.markdown("# Filtros")
 st.sidebar.markdown("### Selecione os países para visualizar o dados:")
@@ -191,12 +192,12 @@ with st.container():
 
 #---------------------------------------
 st.markdown("""---""")
-st.markdown("## Outros indicadores por país",text_alignment="center")
+st.markdown("## Outros indicadores por país")
 with st.container():
   col1, col2 = st.columns(2)
 
   with col1:
-    st.markdown("##### Média de avaliações feitas por país", text_alignment="center")
+    st.markdown("##### Média de avaliações feitas por país")
 #MÉDIA DE AVALIAÇÕES FEITAS POR PAÍS
     fig = hating_country(df1)
     fig.update_layout(
@@ -206,7 +207,7 @@ with st.container():
     st.plotly_chart(fig, use_container_width=True)
 
   with col2:
-    st.markdown("##### Média de preço de um prato para dois por país, na moeda local", text_alignment="center")
+    st.markdown("##### Média de preço de um prato para dois por país, na moeda local")
 #MÉDIA DE PREÇO DE UM PRATO PARA DOIS POR PAÍS
     fig = avg_fottwo(df1)
     fig.update_layout(
