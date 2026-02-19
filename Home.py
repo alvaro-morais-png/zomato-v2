@@ -5,11 +5,6 @@ import base64
 #configurando a página
 st.set_page_config(page_title='Home', layout='wide')
 
-st.set_page_config(
-    page_title="Home"
-
-)
-
 #===========================================
 #BARRA LATERAL NO STREAMLIT
 #===========================================
