@@ -73,7 +73,7 @@ def m(df1):
             ).add_to(marker_cluster)
 
         fig = st_folium(mapa, width=None, height = 600)
-        return fig
+        return fig 
 
 def color_function(color_code):
     COLORS = {
